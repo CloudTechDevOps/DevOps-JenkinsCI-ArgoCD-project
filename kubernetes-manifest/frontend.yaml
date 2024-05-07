@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: quiz
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: 483216680875.dkr.ecr.us-east-1.amazonaws.com/frontend:latest
+        env:
+        - name: VITE_REACT_APP_API_URL
+          value: "http://backend-service:3000/api/questions"
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: quiz
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 8080
+    protocol: TCP
+  type: ClusterIP
